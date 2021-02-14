@@ -2,3 +2,4 @@
 Net5Lambdas.sln.DotSettings.user
 **/bin
 **/obj
+Net5Lambdas/aws-lambda-tools-defaults.json

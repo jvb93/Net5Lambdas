@@ -12,7 +12,7 @@
             "/lambda-entrypoint.sh"
           ],
           "Command": [
-            "Net5Lambdas::Net5Lambdas.Functions::Get"
+            "Net5Lambdas::Net5Lambdas.Get::GetAll"
           ]
         },
         "ImageUri": "",
@@ -26,10 +26,15 @@
           "RootGet": {
             "Type": "Api",
             "Properties": {
-              "Path": "/",
+              "Path": "/Cars",
               "Method": "GET"
             }
           }
+        },
+        "Environment": {
+            "Variables": {
+                "TASK_TABLE_NAME": { "Ref" : "TasksTable" }
+            }
         }
       },
       "Metadata": {
@@ -37,16 +42,74 @@
         "DockerContext": ".",
         "DockerTag": ""
       }
-    }
+    },
+    "Post": {
+      "Type": "AWS::Serverless::Function",
+      "Properties": {
+        "PackageType": "Image",
+        "ImageConfig": {
+          "EntryPoint": [
+            "/lambda-entrypoint.sh"
+          ],
+          "Command": [
+            "Net5Lambdas::Net5Lambdas.Post::Create"
+          ]
+        },
+        "ImageUri": "",
+        "MemorySize": 256,
+        "Timeout": 30,
+        "Role": null,
+        "Policies": [
+          "AWSLambdaBasicExecutionRole",
+          "AmazonDynamoDBFullAccess"
+        ],
+        "Events": {
+          "RootGet": {
+            "Type": "Api",
+            "Properties": {
+              "Path": "/Cars",
+              "Method": "POST"
+            }
+          }
+        },
+        "Environment": {
+            "Variables": {
+                "TASK_TABLE_NAME": { "Ref" : "TasksTable" }
+            }
+        }
+      },
+      "Metadata": {
+        "Dockerfile": "Dockerfile",
+        "DockerContext": ".",
+        "DockerTag": ""
+      }
+    },
     "TasksTable": {
+        "Type": "AWS::DynamoDB::Table",
+        "Properties": {
+            "TableName": "TasksTable",
+            "AttributeDefinitions": [
+                {
+                    "AttributeName": "TaskId",
+                    "AttributeType": "S"
+                }
+            ],
+            "KeySchema": [
+                {
+                    "AttributeName": "TaskId",
+                    "KeyType": "HASH"
+                }
+            ],
+            "BillingMode": "PAY_PER_REQUEST"
+         }
 
     }
   },
   "Outputs": {
     "ApiURL": {
-      "Description": "API endpoint URL for Prod environment",
+      "Description": "API endpoint URL",
       "Value": {
-        "Fn::Sub": "https://${ServerlessRestApi}.execute-api.${AWS::Region}.amazonaws.com/Prod/"
+        "Fn::Sub": "https://${ServerlessRestApi}.execute-api.${AWS::Region}.amazonaws.com/"
       }
     }
   }
