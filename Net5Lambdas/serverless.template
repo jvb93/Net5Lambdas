@@ -12,11 +12,11 @@
             "/lambda-entrypoint.sh"
           ],
           "Command": [
-            "Net5Lambdas::Net5Lambdas.Get::GetAll"
+            "Net5Lambdas::Net5Lambdas.ApiEndpoints.Cars.Get::GetAll"
           ]
         },
         "ImageUri": "",
-        "MemorySize": 256,
+        "MemorySize": 1024,
         "Timeout": 30,
         "Role": null,
         "Policies": [
@@ -52,11 +52,11 @@
             "/lambda-entrypoint.sh"
           ],
           "Command": [
-            "Net5Lambdas::Net5Lambdas.Post::Create"
+            "Net5Lambdas::Net5Lambdas.ApiEndpoints.Cars.Post::CreateCar"
           ]
         },
         "ImageUri": "",
-        "MemorySize": 256,
+        "MemorySize": 1024,
         "Timeout": 30,
         "Role": null,
         "Policies": [
@@ -74,7 +74,8 @@
         },
         "Environment": {
             "Variables": {
-                "TASK_TABLE_NAME": { "Ref" : "TasksTable" }
+                "TASK_TABLE_NAME": { "Ref" : "TasksTable" },
+                "WORKER_QUEUE_URL": { "Ref" : "WorkerQueue" }
             }
         }
       },
@@ -102,7 +103,48 @@
             ],
             "BillingMode": "PAY_PER_REQUEST"
          }
-
+    },
+    "WorkerQueue": {
+        "Type": "AWS::SQS::Queue",
+        "Properties": {
+            "QueueName": "WorkerQueue"
+        }
+    },
+    "Worker": {
+      "Type": "AWS::Serverless::Function",
+      "Properties": {
+        "PackageType": "Image",
+        "ImageConfig": {
+          "EntryPoint": [
+            "/lambda-entrypoint.sh"
+          ],
+          "Command": [
+            "Net5Lambdas::Net5Lambdas.Workers.Cars.Create::CreateCar"
+          ]
+        },
+        "ImageUri": "",
+        "MemorySize": 1024,
+        "Timeout": 30,
+        "Role": null,
+        "Policies": [
+          "AWSLambdaBasicExecutionRole",
+          "AmazonDynamoDBFullAccess"
+        ],
+        "Events": {
+         "SQSTrigger" : {
+             "Type" : "SQS",
+             "Properties" : {
+                 "Queue": {"Fn::GetAtt" : [ "WorkerQueue", "Arn"]},
+                 "BatchSize": 1
+             }
+         }
+        }
+      },
+      "Metadata": {
+        "Dockerfile": "Dockerfile",
+        "DockerContext": ".",
+        "DockerTag": ""
+      }
     }
   },
   "Outputs": {

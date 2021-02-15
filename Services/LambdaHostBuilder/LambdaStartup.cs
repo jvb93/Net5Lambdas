@@ -1,6 +1,7 @@
 ﻿using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Services.TaskService;
+using Services.WorkerQueueService;
 
 namespace Services.LambdaHostBuilder
 {
@@ -9,6 +10,7 @@ namespace Services.LambdaHostBuilder
         public void ConfigureServices(IServiceCollection services, IConfiguration configuration)
         {
             services.AddTaskService(configuration);
+            services.AddWorkerQueueService(configuration);
         }
     }
 }

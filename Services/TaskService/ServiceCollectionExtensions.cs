@@ -13,12 +13,12 @@ namespace Services.TaskService
             serviceCollection.AddAWSService<IAmazonDynamoDB>();
 
             serviceCollection.AddOptions()
-                .Configure<TaskStatusServiceOptions>(o =>
+                .Configure<TaskServiceOptions>(o =>
                 {
-                    o.TableName = configuration.GetSection(TaskStatusServiceOptions.OptionsTableName).Value;
+                    o.TableName = configuration.GetSection(TaskServiceOptions.OptionsTableName).Value;
                 });
 
-            serviceCollection.AddTransient(provider => provider.GetRequiredService<IOptionsMonitor<TaskStatusServiceOptions>>().CurrentValue);
+            serviceCollection.AddTransient(provider => provider.GetRequiredService<IOptionsMonitor<TaskServiceOptions>>().CurrentValue);
 
             return serviceCollection;
         }
