@@ -5,6 +5,7 @@ using Services.LambdaHostBuilder;
 using Services.TaskService;
 using System.Collections.Generic;
 using System.Net;
+using System.Text.Json;
 using System.Threading.Tasks;
 
 namespace Net5Lambdas.ApiEndpoints.Cars
@@ -35,7 +36,7 @@ namespace Net5Lambdas.ApiEndpoints.Cars
             var response = new APIGatewayProxyResponse
             {
                 StatusCode = (int) HttpStatusCode.OK,
-                Headers = new Dictionary<string, string> {{"Content-Type", "text/plain"}}
+                Headers = new Dictionary<string, string> {{"Content-Type", "application/json"}}
             };
 
             if (_hostBuilder.TryBuild(context, () => new LambdaStartup(), out var serviceProvider))
@@ -44,9 +45,9 @@ namespace Net5Lambdas.ApiEndpoints.Cars
 
                 var taskService = container.ServiceProvider.GetRequiredService<ITaskService>();
 
-                var taskId = await taskService.CreateTaskAsync();
+                var serviceTask = await taskService.CreateTaskAsync();
 
-                response.Body = $"Created Task: {taskId}";
+                response.Body = JsonSerializer.Serialize(serviceTask);
             }
 
             else
