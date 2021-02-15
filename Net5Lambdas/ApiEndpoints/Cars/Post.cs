@@ -1,3 +1,4 @@
+using System;
 using Amazon.Lambda.APIGatewayEvents;
 using Amazon.Lambda.Core;
 using Microsoft.Extensions.DependencyInjection;
@@ -43,22 +44,31 @@ namespace Net5Lambdas.ApiEndpoints.Cars
 
             if (_hostBuilder.TryBuild(context, () => new LambdaStartup(), out var serviceProvider))
             {
-                using var container = serviceProvider.CreateScope();
-
-                var taskService = container.ServiceProvider.GetRequiredService<ITaskService>();
-
-                var serviceTask = await taskService.CreateTaskAsync();
-
-                var workerQueueService = container.ServiceProvider.GetRequiredService<IWorkerQueueService>();
-
-                await workerQueueService.SendMessageAsync(new SqsMessageWrapper()
+                try
                 {
-                    Payload = "",
-                    TaskId = serviceTask.TaskId
-                });
+                    using var container = serviceProvider.CreateScope();
+
+                    var taskService = container.ServiceProvider.GetRequiredService<ITaskService>();
+
+                    var serviceTask = await taskService.CreateTaskAsync();
+
+                    var workerQueueService = container.ServiceProvider.GetRequiredService<IWorkerQueueService>();
+
+                    await workerQueueService.SendMessageAsync(new SqsMessageWrapper()
+                    {
+                        Payload = "",
+                        TaskId = serviceTask.TaskId
+                    });
 
 
-                response.Body = JsonSerializer.Serialize(serviceTask);
+                    response.Body = JsonSerializer.Serialize(serviceTask);
+                }
+                catch (Exception ex)
+                {
+                    context.Logger.LogLine(ex.Message);
+                    response.StatusCode = (int)HttpStatusCode.InternalServerError;
+                }
+              
             }
 
             else

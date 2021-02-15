@@ -61,7 +61,8 @@
         "Role": null,
         "Policies": [
           "AWSLambdaBasicExecutionRole",
-          "AmazonDynamoDBFullAccess"
+          "AmazonDynamoDBFullAccess",
+          "AmazonSQSFullAccess"
         ],
         "Events": {
           "RootGet": {
