@@ -1,9 +1,10 @@
 ﻿using System.Threading.Tasks;
+using Models;
 
 namespace Services.WorkerQueueService
 {
     public interface IWorkerQueueService
     {
-        Task SendMessageAsync(string messageBody);
+        Task SendMessageAsync(SqsMessageWrapper message);
     }
 }

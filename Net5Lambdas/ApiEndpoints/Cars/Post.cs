@@ -7,6 +7,8 @@ using System.Collections.Generic;
 using System.Net;
 using System.Text.Json;
 using System.Threading.Tasks;
+using Models;
+using Services.WorkerQueueService;
 
 namespace Net5Lambdas.ApiEndpoints.Cars
 {
@@ -46,6 +48,15 @@ namespace Net5Lambdas.ApiEndpoints.Cars
                 var taskService = container.ServiceProvider.GetRequiredService<ITaskService>();
 
                 var serviceTask = await taskService.CreateTaskAsync();
+
+                var workerQueueService = container.ServiceProvider.GetRequiredService<IWorkerQueueService>();
+
+                await workerQueueService.SendMessageAsync(new SqsMessageWrapper()
+                {
+                    Payload = "",
+                    TaskId = serviceTask.TaskId
+                });
+
 
                 response.Body = JsonSerializer.Serialize(serviceTask);
             }

@@ -1,7 +1,9 @@
-﻿using System.Threading.Tasks;
-using Amazon.SQS;
+﻿using Amazon.SQS;
 using Amazon.SQS.Model;
 using Microsoft.Extensions.Options;
+using Models;
+using System.Text.Json;
+using System.Threading.Tasks;
 
 namespace Services.WorkerQueueService
 {
@@ -15,11 +17,11 @@ namespace Services.WorkerQueueService
             _options = options;
         }
 
-        public async Task SendMessageAsync(string messageBody)
+        public async Task SendMessageAsync(SqsMessageWrapper message)
         {
             var sendMessageRequest = new SendMessageRequest()
             {
-                MessageBody = messageBody,
+                MessageBody = JsonSerializer.Serialize(message),
                 QueueUrl = _options.Value.QueueUrl
             };
 
