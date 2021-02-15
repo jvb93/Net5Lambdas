@@ -139,6 +139,12 @@
                  "BatchSize": 1
              }
          }
+        },
+         "Environment": {
+            "Variables": {
+                "TASK_TABLE_NAME": { "Ref" : "TasksTable" },
+                "WORKER_QUEUE_URL": { "Ref" : "WorkerQueue" }
+            }
         }
       },
       "Metadata": {
